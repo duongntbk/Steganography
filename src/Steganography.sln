@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2036
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoGUI", "DemoGUI\DemoGUI.csproj", "{EBCC0241-FCD8-499A-B0DA-A0569B9F6883}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Steganography", "Steganography\Steganography.csproj", "{8A51C05A-9E27-4EDC-A26B-3F2B186A2EEE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EBCC0241-FCD8-499A-B0DA-A0569B9F6883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBCC0241-FCD8-499A-B0DA-A0569B9F6883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBCC0241-FCD8-499A-B0DA-A0569B9F6883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBCC0241-FCD8-499A-B0DA-A0569B9F6883}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A51C05A-9E27-4EDC-A26B-3F2B186A2EEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A51C05A-9E27-4EDC-A26B-3F2B186A2EEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A51C05A-9E27-4EDC-A26B-3F2B186A2EEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A51C05A-9E27-4EDC-A26B-3F2B186A2EEE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1363C4E6-1B58-469E-B680-A04EAC4012AB}
+	EndGlobalSection
+EndGlobal

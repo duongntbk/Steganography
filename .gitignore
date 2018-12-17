@@ -1,0 +1,8 @@
+.vs/
+*.DotSettings
+*.user
+*.suo
+src/Steganography/bin
+src/Steganography/obj
+src/DemoGUI/bin
+src/DemoGUI/obj
