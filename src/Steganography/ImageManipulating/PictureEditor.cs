@@ -23,27 +23,24 @@ namespace Steganography.ImageManipulating
         }
 
         /// <summary>
-        /// Read image file form disk and get image's data, size, width and height.
+        /// Read image file from binary and get image's data, size, width and height.
         /// </summary>
-        public string Path
+        public void LoadMedium(byte[] fileData)
         {
-            set
-            {
-                var mediumExt = FileHelper.GetFileExtension(value);
-                // Verify that image extension is BMP of PNG
-                if (mediumExt != Constants.BmpExtension && mediumExt != Constants.PngExtension)
-                {
-                    throw new FormatException("Please select a bmp or png file as medium.");
-                }
+            _size = fileData.Length;
+            _img = new Bitmap(new MemoryStream(fileData));
+            var format = _img.RawFormat.Guid;
 
-                _size = new FileInfo(value).Length;
-                _img = new Bitmap(value);
-                _width = _img.Width;
-                _height = _img.Height;
-                if (FileHelper.GetFileExtension(value) == Constants.PngExtension)
-                {
-                    _img = DeleteTransparent();
-                }
+            if (format != ImageFormat.Png.Guid && format != ImageFormat.Bmp.Guid)
+            {
+                throw new FormatException("Image must be either in bmp or png format.");
+            }
+
+            _width = _img.Width;
+            _height = _img.Height;
+            if (format == ImageFormat.Png.Guid)
+            {
+                _img = DeleteTransparent();
             }
         }
 

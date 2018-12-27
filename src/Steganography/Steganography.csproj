@@ -48,7 +48,6 @@
     <Compile Include="Crypto\IMyHashable.cs" />
     <Compile Include="Crypto\NoEncrypt.cs" />
     <Compile Include="Crypto\RijndaelExample.cs" />
-    <Compile Include="FileHelper.cs" />
     <Compile Include="ImageManipulating\ImageManipulator.cs" />
     <Compile Include="ImageManipulating\IManipulator.cs" />
     <Compile Include="ImageManipulating\IPictureEditor.cs" />

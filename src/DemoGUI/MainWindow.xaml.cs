@@ -150,10 +150,14 @@ namespace Steganography
                 // Process save file dialog box results
                 if (result == true)
                 {
+                    // Read picture's info from disk.
+                    var fileData = FileHelper.ReadFileFromDisk(TextPicture.Text).Item1;
+                    // Read secret file's info from disk.
+                    var secretTuple = FileHelper.ReadFileFromDisk(TextFile.Text);
+ 
                     // Hide file into picture
                     var outputExt = FileHelper.GetFileExtension(dlg.FileName);
-                    var fileWithPictureData = await _manipulator.HideFileIntoMediumAsync(TextPicture.Text,
-                        TextFile.Text, TextPassword.Password, outputExt);
+                    var fileWithPictureData = await _manipulator.HideFileIntoMediumAsync(fileData, secretTuple.Item1, secretTuple.Item2, TextPassword.Password, outputExt);
                     File.WriteAllBytes(dlg.FileName, fileWithPictureData);
                     ResetTextBox();
                     MessageBox.Show("Completed.");
@@ -194,7 +198,8 @@ namespace Steganography
                     throw new Exception("Please select a medium!");
                 }
 
-                var secret = await _manipulator.GetFileFromMediumAsync(TextPicture.Text, TextPassword.Password);
+                var mediumData = FileHelper.ReadFileFromDisk(TextPicture.Text).Item1;
+                var secret = await _manipulator.GetFileFromMediumAsync(mediumData, TextPassword.Password);
 
                 var dlg = new SaveFileDialog
                 {

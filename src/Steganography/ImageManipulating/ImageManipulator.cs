@@ -1,6 +1,5 @@
 ﻿using Steganography.Crypto;
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -43,22 +42,19 @@ namespace Steganography.ImageManipulating
         /// <summary>
         /// Hide file in to medium.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="secretPath"></param>
+        /// <param name="fileData"></param>
         /// <param name="password"></param>
+        /// <param name="secretData"></param>
+        /// <param name="secretExt"></param>
         /// <param name="outputExt"></param>
         /// <returns>
         /// Byte array to represents medium file after secret file is added.
         /// </returns>
-        public async Task<byte[]> HideFileIntoMediumAsync(string filePath, string secretPath, string password, string outputExt)
+        public async Task<byte[]> HideFileIntoMediumAsync(byte[] fileData, byte[] secretData,
+            string secretExt, string password, string outputExt)
         {
-            if (outputExt != Constants.BmpExtension && outputExt != Constants.PngExtension)
-            {
-                throw new FormatException("Output must be either in bmp or png format.");
-            }
-
-            // Update PictureEditor's image object using new path from "TextPicture" textbox
-            _pictureEditor.Path = filePath;
+            // Update PictureEditor's image object using new medium.
+            _pictureEditor.LoadMedium(fileData);
 
             // Generate encryption key and IV for encryption process.
             var salt = _hasher.GenerateRandomByteArray(16);
@@ -66,15 +62,14 @@ namespace Steganography.ImageManipulating
             var ivMeta = _hasher.GenerateRandomByteArray(16);
             var ivFile = _hasher.GenerateRandomByteArray(16);
             // Encrypt file content, extension and size.
-            var encryptedExt = _encryptor.Encrypt(FileHelper.GetFileExtension(secretPath), key, ivMeta);
-            var fileData = File.ReadAllBytes(secretPath);
-            var encryptedFile = _encryptor.Encrypt(fileData, key, ivFile);
+            var encryptedExt = _encryptor.Encrypt(secretExt, key, ivMeta);
+            var encryptedFile = _encryptor.Encrypt(secretData, key, ivFile);
             var encryptedSize = _encryptor.Encrypt(encryptedFile.Length * 8, key, ivMeta);
 
             // Added encrypted file data into medium.
             await Task.Run(() =>
             {
-                SetStenographyFlag(password);
+                SetSteganographyFlag(password);
                 SetExtension(encryptedExt);
                 SetSize(encryptedSize);
                 SetIvFile(ivFile);
@@ -90,18 +85,18 @@ namespace Steganography.ImageManipulating
         /// <summary>
         /// Retrieve and decrypt secret file from medium.
         /// </summary>
-        /// <param name="mediumPath"></param>
+        /// <param name="mediumData"></param>
         /// <param name="password"></param>
         /// <returns>
         /// Secret file extension and byte array represents secret file content.
         /// </returns>
-        public async Task<SecretFileData> GetFileFromMediumAsync(string mediumPath, string password)
+        public async Task<SecretFileData> GetFileFromMediumAsync(byte[] mediumData, string password)
         {
             // Update PictureEditor's image object using new path from TextPicture textbox
-            _pictureEditor.Path = mediumPath;
+            _pictureEditor.LoadMedium(mediumData);
 
             // Check if given password is correct and medium file contents secret file.
-            if (!GetStenographyFlag(password))
+            if (!GetSteganographyFlag(password))
             {
                 throw new UnauthorizedAccessException("Password is incorrect or Stenography is disabled");
             }
@@ -170,7 +165,7 @@ namespace Steganography.ImageManipulating
         /// Please refer to readme.txt for information regarding steganography format. 
         /// </summary>
         /// <param name="password"></param>
-        private void SetStenographyFlag(string password)
+        private void SetSteganographyFlag(string password)
         {
             var offset = 0;
             var bytes = _hasher.HashPassword(password);
@@ -182,7 +177,7 @@ namespace Steganography.ImageManipulating
         /// </summary>
         /// <param name="password"></param>
         /// <returns></returns>
-        private bool GetStenographyFlag(string password)
+        private bool GetSteganographyFlag(string password)
         {
             var offset = 0;
             var bytes = _pictureEditor.GetBytes(Constants.FlagSize, offset, 2);

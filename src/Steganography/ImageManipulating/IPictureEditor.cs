@@ -8,7 +8,9 @@
         /// <summary>
         /// Read image file form disk and get image's data, size, width and height.
         /// </summary>
-        string Path { set; }
+        /// <param name="mediumData"></param>
+        /// <returns></returns>
+        void LoadMedium(byte[] mediumData);
         /// <summary>
         /// Verify if medium is big enough to hide secret file.
         /// </summary>
