@@ -3,6 +3,7 @@ using Steganography.Crypto;
 using Steganography.ImageManipulating;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Steganography
@@ -157,7 +158,9 @@ namespace Steganography
  
                     // Hide file into picture
                     var outputExt = FileHelper.GetFileExtension(dlg.FileName);
-                    var fileWithPictureData = await _manipulator.HideFileIntoMediumAsync(fileData, secretTuple.Item1, secretTuple.Item2, TextPassword.Password, outputExt);
+                    var fileWithPictureData = await Task.Run(() =>               
+                            _manipulator.HideFileIntoMedium(fileData, secretTuple.Item1, secretTuple.Item2,
+                                TextPassword.Password, outputExt));
                     File.WriteAllBytes(dlg.FileName, fileWithPictureData);
                     ResetTextBox();
                     MessageBox.Show("Completed.");
@@ -199,7 +202,8 @@ namespace Steganography
                 }
 
                 var mediumData = FileHelper.ReadFileFromDisk(TextPicture.Text).Item1;
-                var secret = await _manipulator.GetFileFromMediumAsync(mediumData, TextPassword.Password);
+                var secret = await Task.Run(() =>
+                    _manipulator.GetFileFromMedium(mediumData, TextPassword.Password));
 
                 var dlg = new SaveFileDialog
                 {

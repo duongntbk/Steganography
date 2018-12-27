@@ -12,7 +12,6 @@ namespace Steganography.ImageManipulating
     /// </summary>
     public class PictureEditor : IPictureEditor
     {
-        private long _size;
         private int _width, _height;
         private Bitmap _img;
         private IPixel _pixelEditor;
@@ -27,7 +26,6 @@ namespace Steganography.ImageManipulating
         /// </summary>
         public void LoadMedium(byte[] fileData)
         {
-            _size = fileData.Length;
             _img = new Bitmap(new MemoryStream(fileData));
             var format = _img.RawFormat.Guid;
 
@@ -159,9 +157,12 @@ namespace Steganography.ImageManipulating
         /// <returns></returns>
         public bool CheckHiddenFileSize(int fileSize)
         {
-            // For each pixel (8 bit), 
-            // the least significant bit in each color is used to stored hidden data,
-            return fileSize <= _size / 8;
+            var fixedByteSize = Constants.FlagSize + Constants.ExtSize + Constants.SizeSize + Constants.IvSaltSize * 3;
+            var neededByteCount = fileSize + fixedByteSize;
+            var totalPixelCount = _width * _height;
+
+            // Each pixel can hold 3 bits.
+            return totalPixelCount * 3 >= neededByteCount * 8;
         }
 
         /// <summary>

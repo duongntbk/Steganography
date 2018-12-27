@@ -1,5 +1,4 @@
 ﻿using Steganography.Crypto;
-using System.Threading.Tasks;
 
 namespace Steganography.ImageManipulating
 {
@@ -20,7 +19,7 @@ namespace Steganography.ImageManipulating
         /// <returns>
         /// Byte array to represents medium file after secret file is added.
         /// </returns>
-        Task<byte[]> HideFileIntoMediumAsync(byte[] fileData, byte[] secretData,
+        byte[] HideFileIntoMedium(byte[] fileData, byte[] secretData,
             string secretExt, string password, string outputExt);
         /// <summary>
         /// Retrieve and decrypt secret file from medium.
@@ -30,6 +29,6 @@ namespace Steganography.ImageManipulating
         /// <returns>
         /// Secret file extension and byte array represents secret file content.
         /// </returns>
-        Task<SecretFileData> GetFileFromMediumAsync(byte[] mediumData, string password);
+        SecretFileData GetFileFromMedium(byte[] mediumData, string password);
     }
 }

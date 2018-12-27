@@ -1,7 +1,6 @@
 ﻿using Steganography.Crypto;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Steganography.ImageManipulating
 {
@@ -50,7 +49,7 @@ namespace Steganography.ImageManipulating
         /// <returns>
         /// Byte array to represents medium file after secret file is added.
         /// </returns>
-        public async Task<byte[]> HideFileIntoMediumAsync(byte[] fileData, byte[] secretData,
+        public byte[] HideFileIntoMedium(byte[] fileData, byte[] secretData,
             string secretExt, string password, string outputExt)
         {
             // Update PictureEditor's image object using new medium.
@@ -67,16 +66,13 @@ namespace Steganography.ImageManipulating
             var encryptedSize = _encryptor.Encrypt(encryptedFile.Length * 8, key, ivMeta);
 
             // Added encrypted file data into medium.
-            await Task.Run(() =>
-            {
-                SetSteganographyFlag(password);
-                SetExtension(encryptedExt);
-                SetSize(encryptedSize);
-                SetIvFile(ivFile);
-                SetIvMeta(ivMeta);
-                SetSalt(salt);
-                SetFile(encryptedFile);
-            });
+            SetSteganographyFlag(password);
+            SetExtension(encryptedExt);
+            SetSize(encryptedSize);
+            SetIvFile(ivFile);
+            SetIvMeta(ivMeta);
+            SetSalt(salt);
+            SetFile(encryptedFile);
 
             // Get medium with secret file and return as byte array.
             return _pictureEditor.GetImageData(outputExt);
@@ -90,7 +86,7 @@ namespace Steganography.ImageManipulating
         /// <returns>
         /// Secret file extension and byte array represents secret file content.
         /// </returns>
-        public async Task<SecretFileData> GetFileFromMediumAsync(byte[] mediumData, string password)
+        public SecretFileData GetFileFromMedium(byte[] mediumData, string password)
         {
             // Update PictureEditor's image object using new path from TextPicture textbox
             _pictureEditor.LoadMedium(mediumData);
@@ -101,24 +97,18 @@ namespace Steganography.ImageManipulating
                 throw new UnauthorizedAccessException("Password is incorrect or Stenography is disabled");
             }
 
-            byte[] fileData = null;
-            var extension = string.Empty;
-
-            await Task.Run(() =>
-            {
-                // Retrieve IV and salt from medium and use them with given password to generate decryption key.
-                var ivMeta = GetIvMeta();
-                var salt = GetSalt();
-                var key = _hasher.GenerateEncryptionKey(password, salt);
-                // Get encrypted file's extension, size and content then decrypt them.
-                var encryptedEx = GetExtension();
-                extension = _encryptor.DecryptString(encryptedEx, key, ivMeta);
-                var encryptedSize = GetSize();
-                var ivFile = GetIvFile();
-                var size = _encryptor.DecryptLong(encryptedSize, key, ivMeta);            
-                var encryptedByte = GetFile(size);
-                fileData = _encryptor.DecryptBytes(encryptedByte, key, ivFile);
-            });
+            // Retrieve IV and salt from medium and use them with given password to generate decryption key.
+            var ivMeta = GetIvMeta();
+            var salt = GetSalt();
+            var key = _hasher.GenerateEncryptionKey(password, salt);
+            // Get encrypted file's extension, size and content then decrypt them.
+            var encryptedEx = GetExtension();
+            var extension = _encryptor.DecryptString(encryptedEx, key, ivMeta);
+            var encryptedSize = GetSize();
+            var ivFile = GetIvFile();
+            var size = _encryptor.DecryptLong(encryptedSize, key, ivMeta);
+            var encryptedByte = GetFile(size);
+            var fileData = _encryptor.DecryptBytes(encryptedByte, key, ivFile);
 
             // Return file content and extension.
             return new SecretFileData
