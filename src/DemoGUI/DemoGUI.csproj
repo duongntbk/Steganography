@@ -76,12 +76,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AnimatedGIFControl.cs" />
+    <Compile Include="Commands.cs" />
+    <Compile Include="EncryptionOption.cs" />
+    <Compile Include="EncryptionOptionToBooleanConverter.cs" />
     <Compile Include="FileHelper.cs" />
+    <Compile Include="MainWindowContext.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="VisibilityToBoleanConverter.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
+using IManipulator = Steganography.ImageManipulating.IManipulator;
 
 namespace Steganography
 {
@@ -13,6 +15,10 @@ namespace Steganography
     /// </summary>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// Binding context for main form.
+        /// </summary>
+        public MainWindowContext Context { get; set; }
         /// <summary>
         /// Object to hide data into and retrieve data from medium.
         /// </summary>
@@ -39,10 +45,12 @@ namespace Steganography
                     PixelEditor = new PixelEditor(),
                 }
             };
+            Context = new MainWindowContext();
             InitializeComponent();
+            DataContext = Context;
         }
 
-        private void BtnQuit_Click(object sender, RoutedEventArgs e)
+        private void ExitCommand_Execute(object sender, ExecutedRoutedEventArgs e)
         {
             Close();
         }
@@ -58,111 +66,115 @@ namespace Steganography
         }
 
         /// <summary>
-        /// Event handler for click event of Browse Picture button.
+        /// Command check for all commands which can run only when decoding/encoding process is not running.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NotRunning_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !Context.IsProcessing;
+        }
+
+        /// <summary>
+        /// Command for Browse Picture button.
         /// Use to select medium file.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BtnPicture_Click(object sender, RoutedEventArgs e)
+        private void SelectMediumCommand_Execute(object sender, ExecutedRoutedEventArgs e)
         {
-            // Create OpenFileDialog 
-            var dlg = new OpenFileDialog
-            {
-                // Set filter for file extension and default file extension 
-                DefaultExt = ".png",
-                Filter = "PNG|*.png|BMP|*.bmp",
-                ValidateNames = false,
-            };
+            var defaultExt = ".png";
+            var filter = "PNG|*.png|BMP|*.bmp";
+            var filePath = SelectOpenFileDialog(filter, defaultExt);
 
-            // Display OpenFileDialog by calling ShowDialog method 
-            var result = dlg.ShowDialog();
-
-            // Get the selected file name and display in a TextBox 
-            if (result == true)
+            // If user has selected a file, display its name in a TextBox
+            if (filePath != null)
             {
-                TextPicture.Text = dlg.FileName;
-                TextPicture.ToolTip = dlg.FileName;
+                Context.MediumFilePath = filePath;
             }
         }
 
         /// <summary>
-        /// Event handler for click event of Browse File button.
+        /// Command for Browse File button.
         /// Use to select secret file.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BtnFile_Click(object sender, RoutedEventArgs e)
+        private void SelectSecretCommand_Execute(object sender, ExecutedRoutedEventArgs e)
         {
-            // Create OpenFileDialog 
-            var dlg = new OpenFileDialog
-            {
-                // Set filter for file extension and default file extension 
-                Filter = "All files|*.*",
-                ValidateNames = false,
-            };
+            var filePath = SelectOpenFileDialog();
 
-            // Display OpenFileDialog by calling ShowDialog method 
-            var result = dlg.ShowDialog();
-
-            // Get the selected file name and display in a TextBox 
-            if (result == true)
+            // If user has selected a file, display its name in a TextBox
+            if (filePath != null)
             {
-                TextFile.Text = dlg.FileName;
-                TextFile.ToolTip = dlg.FileName;
+                Context.SecretFilePath = filePath;
             }
         }
 
         /// <summary>
-        /// Event handler for click event of Encode button.
+        /// Check whether encode command can be execute
+        /// then disable/enable Encode button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EncodeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            // Cannot start encoding if:
+            // - Medium file is not yet selected.
+            // - Secret file is not yet selected.
+            // - Another encoding/decoding process is already running.
+            if (string.IsNullOrEmpty(Context.MediumFilePath) || 
+                string.IsNullOrEmpty(Context.SecretFilePath) ||
+                Context.IsProcessing)
+            {
+                e.CanExecute = false;
+            }
+            else
+            {
+                e.CanExecute = true;
+            }       
+        }
+
+        /// <summary>
+        /// Command for Encode button.
         /// Hide secret file into medium then display save dialog.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void BtnEncode_Click(object sender, RoutedEventArgs e)
+        private async void EncodeCommand_Execute(object sender, ExecutedRoutedEventArgs e)
         {
             try
             {
+                if (FileHelper.GetFileExtension(Context.SecretFilePath).Length > 16)
+                {
+                    throw new Exception("File extension cannot be longer than 16 characters!");
+                }
+
                 DisplayStandByGraphic("Encoding, please wait...");
 
-                if (string.IsNullOrEmpty(TextPicture.Text))
-                {
-                    throw new Exception("Please select a medium!");
-                }
-
-                if (string.IsNullOrEmpty(TextFile.Text))
-                {
-                    throw new Exception("Please select a file to encode!");
-                }
-
-                if (FileHelper.GetFileExtension(TextFile.Text).Length > 16)
-                {
-                    throw new Exception("File extension is too long!");
-                }
-
-                // Create and show save file dialog box
-                var dlg = new SaveFileDialog
-                {
-                    FileName = "hidden", // Default file name
-                    DefaultExt = "png", // Default file extension
-                    Filter = "PNG|*.png|BMP|*.bmp", // Filter files by extension
-                };
-                var result = dlg.ShowDialog();
+                var filename = "hidden";
+                var defaultExt = "png";
+                var filter = "PNG|*.png|BMP|*.bmp";
+                var filePath = SelectSaveFileDialog(filter, defaultExt, filename);
 
                 // Process save file dialog box results
-                if (result == true)
+                if (filePath != null)
                 {
                     // Read picture's info from disk.
-                    var fileData = FileHelper.ReadFileFromDisk(TextPicture.Text).Item1;
+                    var fileData = FileHelper.ReadFileFromDisk(Context.MediumFilePath).Item1;
                     // Read secret file's info from disk.
-                    var secretTuple = FileHelper.ReadFileFromDisk(TextFile.Text);
- 
+                    var secretTuple = FileHelper.ReadFileFromDisk(Context.SecretFilePath);
+                    // Set encryptor according to radio button's value
+                    _manipulator.Encryptor = Context.Encryption == EncryptionOption.Aes ? _aesEncrypt : _noEncrypt;
+
                     // Hide file into picture
-                    var outputExt = FileHelper.GetFileExtension(dlg.FileName);
-                    var fileWithPictureData = await Task.Run(() =>               
+                    var outputExt = FileHelper.GetFileExtension(filePath);
+                    var fileWithPictureData = await Task.Run(() =>
                             _manipulator.HideFileIntoMedium(fileData, secretTuple.Item1, secretTuple.Item2,
                                 TextPassword.Password, outputExt));
-                    File.WriteAllBytes(dlg.FileName, fileWithPictureData);
-                    ResetTextBox();
+                    File.WriteAllBytes(filePath, fileWithPictureData);
+                    Context.MediumFilePath = null;
+                    Context.SecretFilePath = null;
                     MessageBox.Show("Completed.");
                 }
             }
@@ -175,7 +187,7 @@ namespace Steganography
                 MessageBox.Show($"{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
-            {                
+            {
                 MessageBox.Show($"Encoding failed{Environment.NewLine}{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -185,42 +197,53 @@ namespace Steganography
         }
 
         /// <summary>
-        /// Event handler for click event of Decode Picture button.
+        /// Check whether decode command can be execute then
+        /// disable/enable Decode button.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DecodeCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            // Cannot start decoding if medium is not set nor another encode/decode process is already running.
+            if (string.IsNullOrEmpty(Context.MediumFilePath) || Context.IsProcessing)
+            {
+                e.CanExecute = false;
+            }
+            else
+            {
+                e.CanExecute = true;
+            }         
+        }
+
+        /// <summary>
+        /// Command for Decode button.
         /// If password and encryption method is correct, retrieve and decryption secret file from medium.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void BtnDecode_Click(object sender, RoutedEventArgs e)
+        private async void DecodeCommand_Execute(object sender, ExecutedRoutedEventArgs e)
         {
             try
             {
                 DisplayStandByGraphic("Decoding, please wait...");
 
-                if (string.IsNullOrEmpty(TextPicture.Text))
-                {
-                    throw new Exception("Please select a medium!");
-                }
+                // Set encryptor according to radio button's value
+                _manipulator.Encryptor = Context.Encryption == EncryptionOption.Aes ? _aesEncrypt : _noEncrypt;
 
-                var mediumData = FileHelper.ReadFileFromDisk(TextPicture.Text).Item1;
+                var mediumData = FileHelper.ReadFileFromDisk(Context.MediumFilePath).Item1;
                 var secret = await Task.Run(() =>
                     _manipulator.GetFileFromMedium(mediumData, TextPassword.Password));
 
-                var dlg = new SaveFileDialog
-                {
-                    FileName = "secret_file", // Default file name
-                    DefaultExt = secret.Extension, // Default file extension
-                    Filter = secret.Extension + " (*." + secret.Extension + ")|*." + secret.Extension, // Filter files by extension
-                };
-
-                // Show save file dialog box
-                var result = dlg.ShowDialog();
+                var filename = "secret_file";
+                var filter = $"{secret.Extension} (*.{secret.Extension})|*.{secret.Extension}";
+                var filePath = SelectSaveFileDialog(filter, secret.Extension, filename);
 
                 // Process save file dialog box results
-                if (result == true)
+                if (filePath != null)
                 {
-                    var filePath = dlg.FileName;
                     File.WriteAllBytes(filePath, secret.Data);
-                    ResetTextBox();
+                    Context.MediumFilePath = null;
+                    Context.SecretFilePath = null;
                     MessageBox.Show("Completed.");
                 }
             }
@@ -239,23 +262,13 @@ namespace Steganography
         }
 
         /// <summary>
-        /// Reset the value of medium and secret file's text box.
-        /// </summary>
-        private void ResetTextBox()
-        {
-            TextPicture.Clear();
-            TextFile.Clear();
-        }
-
-        /// <summary>
         /// Display animation gif when background task is running.
         /// </summary>
         /// <param name="message"></param>
         private void DisplayStandByGraphic(string message)
         {
-            FrmMainWindow.Title = message;
-            PnOverlay.Visibility = Visibility.Visible;
-            GifCtrl.Visibility = Visibility.Visible;
+            Context.IsProcessing = true;
+            Context.FormTitle = message;
             GifCtrl.StartAnimate();
         }
 
@@ -263,31 +276,58 @@ namespace Steganography
         /// Restore original layout of program.
         /// </summary>
         private void DisplayDefaultGraphic()
-        {
-            FrmMainWindow.Title = "Steganography GUI";
-            PnOverlay.Visibility = Visibility.Hidden;
-            GifCtrl.Visibility = Visibility.Hidden;
+        {            
             GifCtrl.StopAnimate();
+            Context.FormTitle = "Steganography GUI";
+            Context.IsProcessing = false;
         }
 
         /// <summary>
-        /// Change encryption method to AES when corresponding radio button is selected.
+        /// Display an open file dialog so that user can select a file as input.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void RadioAES_Checked(object sender, RoutedEventArgs e)
+        /// <param name="filter"></param>
+        /// <param name="defaultExtension"></param>
+        /// <returns></returns>
+        private string SelectOpenFileDialog(string filter = "All files|*.*", string defaultExtension = null)
         {
-            _manipulator.Encryptor = _aesEncrypt;
+            // Create OpenFileDialog 
+            var dlg = new OpenFileDialog
+            {
+                // Set filter for file extension and default file extension
+                DefaultExt = defaultExtension ?? string.Empty,
+                Filter = filter,
+                ValidateNames = false,
+            };
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            var result = dlg.ShowDialog();
+
+            // If a file was selected, return its name; return null otherwise
+            return result == true ? dlg.FileName : null;
         }
 
         /// <summary>
-        /// Change encryption method to no encryption when corresponding radio button is selected.
+        /// Display an save file dialog so that user can select path to save output.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void RadioNone_Checked(object sender, RoutedEventArgs e)
+        /// <param name="filter"></param>
+        /// <param name="defaultExtension"></param>
+        /// <param name="filename"></param>
+        /// <returns></returns>
+        private string SelectSaveFileDialog(string filter = "All files|*.*", string defaultExtension = null,
+            string filename = null)
         {
-            _manipulator.Encryptor = _noEncrypt;
+            var dlg = new SaveFileDialog
+            {
+                FileName = filename ?? string.Empty, // Default file name
+                DefaultExt = defaultExtension ?? string .Empty, // Default file extension
+                Filter = filter, // Filter files by extension
+            };
+
+            // Show save file dialog box
+            var result = dlg.ShowDialog();
+
+            // Process save file dialog box results
+            return result == true ? dlg.FileName : null;
         }
     }
 }

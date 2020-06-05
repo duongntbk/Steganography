@@ -1,24 +1,201 @@
-﻿<Window x:Name="FrmMainWindow" x:Class="Steganography.MainWindow"
+﻿<Window x:Class="Steganography.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:Steganography"
-        Title="Steganography GUI" Height="311.154" Width="539.328" Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
+        Title="{Binding FormTitle}" Height="320" Width="550" Background="{DynamicResource {x:Static SystemColors.MenuBrushKey}}" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter>
+                <Setter.Property>Width</Setter.Property>
+                <Setter.Value>75</Setter.Value>
+            </Setter>
+            <Setter>
+                <Setter.Property>Height</Setter.Property>
+                <Setter.Value>20</Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter>
+                <Setter.Property>Height</Setter.Property>
+                <Setter.Value>25</Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter>
+                <Setter.Property>Height</Setter.Property>
+                <Setter.Value>25</Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Label">
+            <Setter>
+                <Setter.Property>Height</Setter.Property>
+                <Setter.Value>25</Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="RadioButton">
+            <Setter>
+                <Setter.Property>Height</Setter.Property>
+                <Setter.Value>25</Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="local:Commands.Encode" CanExecute="EncodeCommand_CanExecute" Executed="EncodeCommand_Execute" />
+        <CommandBinding Command="local:Commands.Decode" CanExecute="DecodeCommand_CanExecute" Executed="DecodeCommand_Execute" />
+        <CommandBinding Command="local:Commands.SelectMedium" CanExecute="NotRunning_CanExecute" Executed="SelectMediumCommand_Execute" />
+        <CommandBinding Command="local:Commands.SelectSecret" CanExecute="NotRunning_CanExecute" Executed="SelectSecretCommand_Execute" />
+        <CommandBinding Command="local:Commands.Exit" CanExecute="NotRunning_CanExecute" Executed="ExitCommand_Execute" />
+    </Window.CommandBindings>
     <Grid>
-        <Label x:Name="LabelPassword" Content="Password" HorizontalAlignment="Left" Margin="36,30,0,0" VerticalAlignment="Top" Width="75"/>
-        <PasswordBox x:Name="TextPassword" HorizontalAlignment="Left" Margin="131,30,0,0" VerticalAlignment="Top" Width="364" Height="23"/>
-        <Label x:Name="LabelPicture" Content="Select Picture" HorizontalAlignment="Left" Margin="36,101,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.507,0.134"/>
-        <Label x:Name="LabelFile" Content="File " HorizontalAlignment="Left" Margin="36,141,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="TextPicture" HorizontalAlignment="Left" Height="23" Margin="131,101,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="269" IsReadOnly="True" ToolTip=""/>
-        <TextBox x:Name="TextFile" HorizontalAlignment="Left" Height="23" Margin="131,141,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="269" IsReadOnly="True" ToolTip=""/>
-        <Button x:Name="BtnPicture" Content="Browse" HorizontalAlignment="Left" Margin="420,102,0,0" VerticalAlignment="Top" Width="75" Click="BtnPicture_Click"/>
-        <Button x:Name="BtnFile" Content="Browse" HorizontalAlignment="Left" Margin="420,141,0,0" VerticalAlignment="Top" Width="75" Click="BtnFile_Click"/>
-        <Button x:Name="BtnEncode" Content="Encode" HorizontalAlignment="Left" Margin="36,205,0,0" VerticalAlignment="Top" Width="75" Click="BtnEncode_Click"/>
-        <Button x:Name="BtnDecode" Content="Decode" HorizontalAlignment="Left" Margin="131,205,0,0" VerticalAlignment="Top" Width="75" Click="BtnDecode_Click"/>
-        <Button x:Name="BtnQuit" Content="Quit" HorizontalAlignment="Left" Margin="228,205,0,0" VerticalAlignment="Top" Width="75" Click="BtnQuit_Click"/>
-        <Rectangle x:Name="PnOverlay" Fill="{DynamicResource {x:Static SystemColors.ControlLightLightBrushKey}}" Stroke="Black" StrokeThickness="0" Visibility="Hidden" Opacity="0.7"/>
-        <local:AnimatedGIFControl x:Name="GifCtrl" Visibility="Hidden"/>
-        <Label x:Name="LabelEncrypt" Content="Encryption" HorizontalAlignment="Left" Margin="36,60,0,0" VerticalAlignment="Top" Width="75"/>
-        <RadioButton x:Name="RadioAes" Content="AES" HorizontalAlignment="Left" Margin="131,66,0,0" VerticalAlignment="Top" IsChecked="True" Checked="RadioAES_Checked"/>
-        <RadioButton x:Name="RadioNone" Content="None" HorizontalAlignment="Left" Margin="212,66,0,0" VerticalAlignment="Top" Checked="RadioNone_Checked"/>
+        <Grid>
+            <Grid.Margin>25</Grid.Margin>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="100"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+                <RowDefinition Height="1*"/>
+            </Grid.RowDefinitions>
+            <Label>
+                <Label.Content>Password</Label.Content>
+            </Label>
+            <PasswordBox x:Name="TextPassword">
+                <Grid.Column>1</Grid.Column>
+                <Grid.Row>0</Grid.Row>
+                <Grid.ColumnSpan>4</Grid.ColumnSpan>
+            </PasswordBox>
+            <Label>
+                <Grid.Column>0</Grid.Column>
+                <Grid.Row>1</Grid.Row>
+                <Label.Content>Encryption</Label.Content>
+            </Label>
+            <RadioButton>
+                <Grid.Column>1</Grid.Column>
+                <Grid.Row>1</Grid.Row>
+                <RadioButton.Content>AES</RadioButton.Content>
+                <RadioButton.IsChecked>
+                    <Binding>
+                        <Binding.ConverterParameter>
+                            <x:Static Member="local:EncryptionOption.Aes"/>
+                        </Binding.ConverterParameter>
+                        <Binding.Path>Encryption</Binding.Path>
+                        <Binding.Converter>
+                            <local:EncryptionOptionToBooleanConverter />
+                        </Binding.Converter>
+                    </Binding>
+                </RadioButton.IsChecked>
+            </RadioButton>
+            <RadioButton>
+                <Grid.Column>2</Grid.Column>
+                <Grid.Row>1</Grid.Row>
+                <RadioButton.Content>None</RadioButton.Content>
+                <RadioButton.IsChecked>
+                    <Binding>
+                        <Binding.ConverterParameter>
+                            <x:Static Member="local:EncryptionOption.None"/>
+                        </Binding.ConverterParameter>
+                        <Binding.Path>Encryption</Binding.Path>
+                        <Binding.Converter>
+                            <local:EncryptionOptionToBooleanConverter />
+                        </Binding.Converter>
+                    </Binding>
+                </RadioButton.IsChecked>
+            </RadioButton>
+            <Label>
+                <Grid.Column>0</Grid.Column>
+                <Grid.Row>2</Grid.Row>
+                <Label.Content>Select Medium</Label.Content>
+            </Label>
+            <TextBox>
+                <Grid.Column>1</Grid.Column>
+                <Grid.Row>2</Grid.Row>
+                <Grid.ColumnSpan>3</Grid.ColumnSpan>
+                <TextBox.Text>
+                    <Binding Path="MediumFilePath" />
+                </TextBox.Text>
+                <TextBox.ToolTip>
+                    <Binding Path="MediumFilePath"/>
+                </TextBox.ToolTip>
+            </TextBox>
+            <Button>
+                <Grid.Column>4</Grid.Column>
+                <Grid.Row>2</Grid.Row>
+                <Button.Content>Browse</Button.Content>
+                <Button.Command>local:Commands.SelectMedium</Button.Command>
+            </Button>
+            <Label>
+                <Grid.Column>0</Grid.Column>
+                <Grid.Row>3</Grid.Row>
+                <Label.Content>Select Secret</Label.Content>
+            </Label>
+            <TextBox>
+                <Grid.Column>1</Grid.Column>
+                <Grid.Row>3</Grid.Row>
+                <Grid.ColumnSpan>3</Grid.ColumnSpan>
+                <TextBox.Text>
+                    <Binding Path="SecretFilePath" />
+                </TextBox.Text>
+                <TextBox.ToolTip>
+                    <Binding Path="SecretFilePath"/>
+                </TextBox.ToolTip>
+            </TextBox>
+            <Button>
+                <Grid.Column>4</Grid.Column>
+                <Grid.Row>3</Grid.Row>
+                <Button.Content>Browse</Button.Content>
+                <Button.Command>local:Commands.SelectSecret</Button.Command>
+            </Button>
+            <Button>
+                <Grid.Column>0</Grid.Column>
+                <Grid.Row>4</Grid.Row>
+                <Button.Content>Encode</Button.Content>
+                <Button.Command>local:Commands.Encode</Button.Command>
+            </Button>
+            <Button>
+                <Grid.Column>1</Grid.Column>
+                <Grid.Row>4</Grid.Row>
+                <Button.Content>Decode</Button.Content>
+                <Button.Command>local:Commands.Decode</Button.Command>
+            </Button>
+            <Button>
+                <Grid.Column>2</Grid.Column>
+                <Grid.Row>4</Grid.Row>
+                <Button.Content>Quit</Button.Content>
+                <Button.Command>local:Commands.Exit</Button.Command>
+            </Button>
+        </Grid>
+        <Rectangle>
+            <Rectangle.Opacity>0.7</Rectangle.Opacity>
+            <Rectangle.StrokeThickness>0</Rectangle.StrokeThickness>
+            <Rectangle.Stroke>Black</Rectangle.Stroke>
+            <Rectangle.Fill>
+                <DynamicResource ResourceKey="{x:Static SystemColors.ControlLightLightBrushKey}" />
+            </Rectangle.Fill>
+            <Rectangle.Visibility>
+                <Binding>
+                    <Binding.Path>IsProcessing</Binding.Path>
+                    <Binding.Converter>
+                        <local:VisibilityToBoleanConverter />
+                    </Binding.Converter>
+                </Binding>
+            </Rectangle.Visibility>
+        </Rectangle>
+        <local:AnimatedGIFControl x:Name="GifCtrl">
+            <local:AnimatedGIFControl.Visibility>
+                <Binding>
+                    <Binding.Path>IsProcessing</Binding.Path>
+                    <Binding.Converter>
+                        <local:VisibilityToBoleanConverter />
+                    </Binding.Converter>
+                </Binding>
+            </local:AnimatedGIFControl.Visibility>
+        </local:AnimatedGIFControl>
     </Grid>
 </Window>
