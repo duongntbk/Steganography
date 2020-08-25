@@ -182,7 +182,7 @@
                 <Binding>
                     <Binding.Path>IsProcessing</Binding.Path>
                     <Binding.Converter>
-                        <local:VisibilityToBoleanConverter />
+                        <local:VisibilityToBooleanConverter />
                     </Binding.Converter>
                 </Binding>
             </Rectangle.Visibility>
@@ -192,7 +192,7 @@
                 <Binding>
                     <Binding.Path>IsProcessing</Binding.Path>
                     <Binding.Converter>
-                        <local:VisibilityToBoleanConverter />
+                        <local:VisibilityToBooleanConverter />
                     </Binding.Converter>
                 </Binding>
             </local:AnimatedGIFControl.Visibility>

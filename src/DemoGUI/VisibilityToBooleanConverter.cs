@@ -9,7 +9,7 @@ namespace Steganography
     /// Converter between boolean value and Visibility.
     /// Used to convert between value IsProcessing flag of binding context and value on UI.
     /// </summary>
-    public class VisibilityToBoleanConverter : IValueConverter
+    public class VisibilityToBooleanConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
